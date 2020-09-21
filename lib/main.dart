@@ -77,6 +77,17 @@ class _LoginState extends State<Login> {
     });
   }
 
+  signOut() async {
+    final response =
+        await http.get("http://192.168.2.3/laravel_android/public/api/logout");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {
+      preferences.setString("token", null);
+      preferences.commit();
+      _loginStatus = LoginStatus.notSignIn;
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -134,22 +145,39 @@ class _LoginState extends State<Login> {
         );
         break;
       case LoginStatus.signIn:
-        return MainMenu();
+        return MainMenu(signOut);
         break;
     }
   }
 }
 
 class MainMenu extends StatefulWidget {
+  final VoidCallback signOut;
+  MainMenu(this.signOut);
   @override
   _MainMenuState createState() => _MainMenuState();
 }
 
 class _MainMenuState extends State<MainMenu> {
+  signOut() {
+    setState(() {
+      widget.signOut();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              signOut();
+            },
+            icon: Icon(Icons.lock_open),
+          )
+        ],
+      ),
       body: Center(
         child: Text("Menu utama"),
       ),
